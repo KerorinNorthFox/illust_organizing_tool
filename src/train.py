@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 DATASET_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 DATASET_PATH = os.path.join(DATASET_DIR, "dataset")
+print("Dataset path:", DATASET_PATH)
 
 ### 画像の前処理 ###
 train_transform = transforms.Compose([
@@ -28,6 +29,8 @@ val_transform = transforms.Compose([
 
 ### データセット読み込み ###
 base_dataset = datasets.ImageFolder(DATASET_PATH, transform=None)
+num_classes = len(base_dataset.classes)
+print("クラス数:", base_dataset.classes)
 
 val_ratio = 0.2
 total_size = len(base_dataset)
@@ -41,7 +44,7 @@ train_indices, val_indices = random_split(
 )
 
 train_dataset_full = datasets.ImageFolder(DATASET_PATH, transform=train_transform)
-val_dataset_full = datasets.ImageFolder(DATASET_PATH, transforms=val_transform)
+val_dataset_full = datasets.ImageFolder(DATASET_PATH, transform=val_transform)
 
 train_dataset = Subset(train_dataset_full, train_indices.indices)
 val_dataset = Subset(val_dataset_full, val_indices.indices)
@@ -70,7 +73,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         optimizer.step()
         
     avg_train_loss = train_loss / len(dataloader.dataset) # 損失平均
-    avg_train_acc = train_acc / len(dataloader.datset) # 精度平均
+    avg_train_acc = train_acc / len(dataloader.dataset) # 精度平均
     return avg_train_loss, avg_train_acc
 
 def val_epoch(model, dataloader, criterion, device):
@@ -85,7 +88,7 @@ def val_epoch(model, dataloader, criterion, device):
             outputs = model(images)
             loss = criterion(outputs, labels)
             val_loss += loss.item() * images.size(0)
-            acc = (outputs.amx(1)[1] == labels).sum()
+            acc = (outputs.max(1)[1] == labels).sum()
             val_acc += acc.item()
         
     avg_val_loss = val_loss / len(dataloader.dataset)
@@ -94,11 +97,8 @@ def val_epoch(model, dataloader, criterion, device):
 
 
 if __name__ == "__main__":
-    num_classes = len(train_dataset.classes)
-    print("クラス数:", train_dataset.calsses)
-    
     ### モデル定義 ###
-    weights = models.RESNET50_Weights.DEFAULT
+    weights = models.ResNet50_Weights.DEFAULT
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     model = models.resnet50(weights=weights)
@@ -114,6 +114,7 @@ if __name__ == "__main__":
     val_acc_list = []
     epochs = 10
     for epoch in range(epochs):
+        print(f"Epochs: {epoch+1}")
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
         val_loss, val_acc = val_epoch(model, val_loader, criterion, device)
 
@@ -122,7 +123,7 @@ if __name__ == "__main__":
         val_loss_list.append(val_loss)
         val_acc_list.append(val_acc)
 
-        print(f"Epochs: {epochs+1}, train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
+        print(f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
 
     torch.save(model.state_dict(), f"model.pth")
     print("Saved model.")
