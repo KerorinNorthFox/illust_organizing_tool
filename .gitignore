@@ -1,3 +1,6 @@
 /image
 /result
 /dl_images
+/dataset
+/test_set
+*.pth
