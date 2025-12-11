@@ -1,10 +1,12 @@
 import os
+import pathlib
 import torch
 import torch.nn as nn
 from torchvision import models, transforms
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+from settings import load_detect_same_image_data, JSON_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("using device:", device)
@@ -100,14 +102,14 @@ def display(result, save_dir=None):
     plt.show()
 
 if __name__ == "__main__":
-    script_path = os.path.realpath(__file__)
-    script_base = os.path.dirname(script_path)
-    proj_dir = os.path.dirname(script_base)
-    image_dir = os.path.join(proj_dir, "image")
-
-    dirA = os.path.join(image_dir, "A")
-    dirB = os.path.join(image_dir, "B")
+    DIR_A, DIR_B, RESULT_DIR = load_detect_same_image_data(JSON_PATH)
+    if not pathlib.Path(DIR_A).is_absolute():
+        DIR_A = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), DIR_A)
+    if not pathlib.Path(DIR_B).is_absolute():
+        DIR_B = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), DIR_B)
+    if not pathlib.Path(RESULT_DIR).is_absolute():
+        RESULT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), RESULT_DIR)
     
-    results = compare_all(dirA, dirB)
+    results = compare_all(DIR_A, DIR_B)
     for result in results:
-        display(result, os.path.join(proj_dir, "result")) 
+        display(result, RESULT_DIR) 
