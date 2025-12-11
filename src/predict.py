@@ -1,15 +1,16 @@
 import os
-import pathlib
 import torch
 import torch.nn.functional as F
 from torchvision import models
-from train import val_transform
 from tqdm import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
+
+from train import val_transform
+from path_solver import get_base_dir, get_absolute_path_if_not
 from settings import load_predict_data, JSON_PATH
 
-def predict(image_path, model, class_names, device):
+def predict(image_path, model, device):
     img = Image.open(image_path).convert("RGB")
     x = val_transform(img).unsqueeze(0).to(device)
 
@@ -20,15 +21,13 @@ def predict(image_path, model, class_names, device):
         
     max_prob = max_prob.item()
     class_id = pred.item()
-    if max_prob < 0.7:
-        return "other", -1, max_prob
         
-    return class_names[class_id], class_id, max_prob
+    return class_id, max_prob
     
-def load_model(model_path, class_names):
+def load_model(model_path, class_num):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = models.resnet50(weights=None)
-    model.fc = torch.nn.Linear(model.fc.in_features, len(class_names))
+    model.fc = torch.nn.Linear(model.fc.in_features, class_num)
     model.load_state_dict(torch.load(model_path, map_location=device))
     model = model.to(device)
     model.eval()
@@ -44,17 +43,20 @@ def display(image_path, class_name, class_id, prob):
     plt.show()
 
 if __name__ == "__main__":
-    TARGET, MODEL_PATH = load_predict_data(JSON_PATH)
-    if not pathlib.Path(TARGET).is_absolute():
-        TARGET = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), TARGET)
-        
+    TARGET, MODEL_PATH, DATASET_DIR= load_predict_data(JSON_PATH)
+    TARGET = get_absolute_path_if_not(get_base_dir(__file__), TARGET)
+    # DATASET_DIRからクラス名を取得
+    class_names = sorted(
+        [name for name in os.listdir(DATASET_DIR) if os.path.isdir(os.path.join(DATASET_DIR, name))]
+    )
+    model, device = load_model(MODEL_PATH, len(class_names))
+
+    # TARGETディレクトリ内の全ての画像絶対パスを取得
     image_pathes = sorted(
         [os.path.join(TARGET, f) for f in os.listdir(TARGET) if f.lower().endswith(("png", "jpg", "jpeg"))]
     )
-    class_names = ["hoshino", "kisaki", "mari", "seia"]
-    model, device = load_model(MODEL_PATH, class_names)
-
     for image_path in tqdm(image_pathes):
-        name, id, prob = predict(image_path, model, class_names, device)
+        id, prob = predict(image_path, model, device)
+        name = class_names[id]
         display(image_path, name, id, prob)
 
