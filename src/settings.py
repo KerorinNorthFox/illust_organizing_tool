@@ -55,7 +55,7 @@ def load_test_data(json_path):
     test_data = data["test"]
     
     dataset_dir = test_data["dataset_dir"]
-    model_path = test_data["model_path"]
+    model_path = data["model_path"]
 
     return dataset_dir, model_path
 
@@ -64,7 +64,8 @@ def load_predict_data(json_path):
     predict_data = data["predict"]
 
     target = predict_data["target"]
-    model_path = predict_data["model_path"]
+    model_path = data["model_path"]
+    dataset_dir = data["train"]["dataset_dir"]
 
-    return target, model_path
+    return target, model_path, dataset_dir
 
