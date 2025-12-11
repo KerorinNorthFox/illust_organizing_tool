@@ -1,12 +1,16 @@
 import os
+import pathlib
+import datetime
 import torch
 from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import datasets, transforms, models
 from tqdm import tqdm
+from settings import load_train_data, JSON_PATH
 
-DATASET_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-DATASET_PATH = os.path.join(DATASET_DIR, "dataset")
-print("Dataset path:", DATASET_PATH)
+DATASET_DIR, MODEL_PATH_SAVE = load_train_data(JSON_PATH)
+if not pathlib.Path(DATASET_DIR).is_absolute():
+   DATASET_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), DATASET_DIR)
+print("Dataset dir:", DATASET_DIR)
 
 ### 画像の前処理 ###
 train_transform = transforms.Compose([
@@ -28,7 +32,7 @@ val_transform = transforms.Compose([
 ])
 
 ### データセット読み込み ###
-base_dataset = datasets.ImageFolder(DATASET_PATH, transform=None)
+base_dataset = datasets.ImageFolder(DATASET_DIR, transform=None)
 num_classes = len(base_dataset.classes)
 print("クラス数:", base_dataset.classes)
 
@@ -43,8 +47,8 @@ train_indices, val_indices = random_split(
     generator=torch.Generator().manual_seed(42)
 )
 
-train_dataset_full = datasets.ImageFolder(DATASET_PATH, transform=train_transform)
-val_dataset_full = datasets.ImageFolder(DATASET_PATH, transform=val_transform)
+train_dataset_full = datasets.ImageFolder(DATASET_DIR, transform=train_transform)
+val_dataset_full = datasets.ImageFolder(DATASET_DIR, transform=val_transform)
 
 train_dataset = Subset(train_dataset_full, train_indices.indices)
 val_dataset = Subset(val_dataset_full, val_indices.indices)
@@ -125,5 +129,7 @@ if __name__ == "__main__":
 
         print(f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
 
-    torch.save(model.state_dict(), f"model.pth")
+    now = datetime.datetime.now()
+    model_name = MODEL_PATH_SAVE.replace("{datetime}", now.strftime("%Y-%m-%d-%H:%M:%S"))
+    torch.save(model.state_dict(), model_name)
     print("Saved model.")

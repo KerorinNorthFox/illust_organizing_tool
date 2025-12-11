@@ -1,4 +1,5 @@
 import os
+import pathlib
 import torch
 import torch.nn.functional as F
 from torchvision import models
@@ -6,7 +7,7 @@ from train import val_transform
 from tqdm import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
-
+from settings import load_predict_data, JSON_PATH
 
 def predict(image_path, model, class_names, device):
     img = Image.open(image_path).convert("RGB")
@@ -43,14 +44,15 @@ def display(image_path, class_name, class_id, prob):
     plt.show()
 
 if __name__ == "__main__":
-    DIR = "C:\\Images"
-    MODEL = "model.pth"
-    
+    TARGET, MODEL_PATH = load_predict_data(JSON_PATH)
+    if not pathlib.Path(TARGET).is_absolute():
+        TARGET = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), TARGET)
+        
     image_pathes = sorted(
-        [os.path.join(DIR, f) for f in os.listdir(DIR) if f.lower().endswith(("png", "jpg", "jpeg"))]
+        [os.path.join(TARGET, f) for f in os.listdir(TARGET) if f.lower().endswith(("png", "jpg", "jpeg"))]
     )
     class_names = ["hoshino", "kisaki", "mari", "seia"]
-    model, device = load_model(MODEL, class_names)
+    model, device = load_model(MODEL_PATH, class_names)
 
     for image_path in tqdm(image_pathes):
         name, id, prob = predict(image_path, model, class_names, device)

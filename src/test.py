@@ -1,15 +1,18 @@
 import os
+import pathlib
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, models
 from train import val_transform
 from tqdm import tqdm
+from settings import load_test_data, JSON_PATH
 
-DATASET_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-DATASET_PATH = os.path.join(DATASET_DIR, "test_set")
-MODEL = "model.pth"
+DATASET_DIR, MODEL_PATH = load_test_data(JSON_PATH)
+if not pathlib.Path(DATASET_DIR).is_absolute():
+   DATASET_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), DATASET_DIR)
+print("Dataset dir:", DATASET_DIR)
 
-test_dataset = datasets.ImageFolder(DATASET_PATH, transform=val_transform)
+test_dataset = datasets.ImageFolder(DATASET_DIR, transform=val_transform)
 test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
 def predict(model, dataloader, device):
@@ -31,7 +34,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = models.resnet50(weights=None)
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-    model.load_state_dict(torch.load(MODEL, map_location=device))
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     model = model.to(device)
 
     test_acc = predict(model, test_loader, device)
