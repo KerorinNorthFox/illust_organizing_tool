@@ -1,28 +1,24 @@
 import os
+import pathlib
 from urllib.parse import urljoin
 import requests
-
-TAGS = ["hoshino_(blue_archive)", "1girl"]
-START_PAGE_INDEX = 100
-END_PAGE_INDEX = 101
-SAVE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "dl_images")
+from settings import load_dataset_downloader_data, JSON_PATH
 
 BASE_URL = "https://danbooru.donmai.us"
 POST_JSON_URL = urljoin(BASE_URL, "posts.json")
 
-
-def download(tags:list[str], start:int, end:int, save_dir:str):
+def download(json_url, tags:list[str], start:int, end:int, save_dir:str):
     for i in list(range(start, end)):
-        URL = f"{POST_JSON_URL}?page={str(i)}&tags={'+'.join(tags)}"
-        print(f"\n>>URL: {URL}, page: {i}")
+        url = f"{json_url}?page={str(i)}&tags={'+'.join(tags)}"
+        print(f"\n>>URL: {url}, page: {i}")
 
         # res = requests.get(POST_JSON_URL, params=PARAMS)
-        res = requests.get(URL)
+        res = requests.get(url)
         print(f"URL :{res.url} (READ)")
         try:
             res.raise_for_status()
         except:
-            print(f"URL {URL} is failed.")
+            print(f"URL {url} is failed.")
             continue
         data = res.json()
 
@@ -67,5 +63,9 @@ def download(tags:list[str], start:int, end:int, save_dir:str):
                 print("Saved:", filename)
 
 if __name__ == "__main__":
+    TAGS, START_PAGE_INDEX, END_PAGE_INDEX, SAVE_DIR = load_dataset_downloader_data(JSON_PATH)
+    if not pathlib.Path(SAVE_DIR).is_absolute():
+        SAVE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), SAVE_DIR)
+        
     print("Start download")
-    download(TAGS, START_PAGE_INDEX, END_PAGE_INDEX, SAVE_DIR)
+    download(POST_JSON_URL, TAGS, START_PAGE_INDEX, END_PAGE_INDEX, SAVE_DIR)
