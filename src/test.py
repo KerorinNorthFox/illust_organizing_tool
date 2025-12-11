@@ -1,15 +1,14 @@
-import os
-import pathlib
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, models
 from train import val_transform
 from tqdm import tqdm
+
+from path_solver import get_base_dir, get_absolute_path_if_not
 from settings import load_test_data, JSON_PATH
 
 DATASET_DIR, MODEL_PATH = load_test_data(JSON_PATH)
-if not pathlib.Path(DATASET_DIR).is_absolute():
-   DATASET_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), DATASET_DIR)
+DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), DATASET_DIR)
 print("Dataset dir:", DATASET_DIR)
 
 test_dataset = datasets.ImageFolder(DATASET_DIR, transform=val_transform)
