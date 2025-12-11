@@ -1,6 +1,5 @@
-/image
-/result
+/detect_same_image_test
 /dl_images
-/dataset
-/test_set
+/datasets
 *.pth
+settings.json
