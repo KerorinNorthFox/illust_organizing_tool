@@ -130,6 +130,7 @@ if __name__ == "__main__":
         print(f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
 
     now = datetime.datetime.now()
-    model_name = MODEL_PATH_SAVE.replace("{datetime}", now.strftime("%Y-%m-%d-%H-%M-%S"))
-    torch.save(model.state_dict(), model_name)
+    model_path = MODEL_PATH_SAVE.replace("{datetime}", now.strftime("%Y-%m-%d-%H-%M-%S"))
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    torch.save(model.state_dict(), model_path)
     print("Saved model.")
