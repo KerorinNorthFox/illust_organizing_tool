@@ -45,6 +45,7 @@ def display(image_path, class_name, class_id, prob):
 if __name__ == "__main__":
     TARGET, MODEL_PATH, DATASET_DIR= load_predict_data(JSON_PATH)
     TARGET = get_absolute_path_if_not(get_base_dir(__file__), TARGET)
+    DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), DATASET_DIR)
     # DATASET_DIRからクラス名を取得
     class_names = sorted(
         [name for name in os.listdir(DATASET_DIR) if os.path.isdir(os.path.join(DATASET_DIR, name))]
