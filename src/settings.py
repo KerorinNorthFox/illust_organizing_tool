@@ -46,8 +46,9 @@ def load_train_data(json_path):
 
     dataset_dir = train_data["dataset_dir"]
     model_path_save = train_data["model_path_save"]
+    epochs = train_data["epochs"]
 
-    return dataset_dir, model_path_save
+    return dataset_dir, model_path_save, epochs
 
 def load_test_data(json_path):
     data = load_json(json_path)

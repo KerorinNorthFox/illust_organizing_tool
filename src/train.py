@@ -7,7 +7,7 @@ from torchvision import datasets, transforms, models
 from tqdm import tqdm
 from settings import load_train_data, JSON_PATH
 
-DATASET_DIR, MODEL_PATH_SAVE = load_train_data(JSON_PATH)
+DATASET_DIR, MODEL_PATH_SAVE, EPOCHS = load_train_data(JSON_PATH)
 if not pathlib.Path(DATASET_DIR).is_absolute():
    DATASET_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), DATASET_DIR)
 print("Dataset dir:", DATASET_DIR)
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     train_acc_list = []
     val_loss_list = []
     val_acc_list = []
-    epochs = 10
+    epochs = EPOCHS
     for epoch in range(epochs):
         print(f"Epochs: {epoch+1}")
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
@@ -130,6 +130,6 @@ if __name__ == "__main__":
         print(f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
 
     now = datetime.datetime.now()
-    model_name = MODEL_PATH_SAVE.replace("{datetime}", now.strftime("%Y-%m-%d-%H:%M:%S"))
+    model_name = MODEL_PATH_SAVE.replace("{datetime}", now.strftime("%Y-%m-%d-%H-%M-%S"))
     torch.save(model.state_dict(), model_name)
     print("Saved model.")
