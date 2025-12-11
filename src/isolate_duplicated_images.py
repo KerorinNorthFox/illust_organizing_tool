@@ -1,15 +1,16 @@
 # ディレクトリ内で重複した画像を
 # tmpディレクトリに移動するスクリプト
 import os
+import pathlib
 import copy
 import shutil
 from detect_same_image import compare
+from settings import load_isolate_duplicated_images_data, JSON_PATH
 
-script_path = os.path.realpath(__file__)
-script_base = os.path.dirname(script_path)
-proj_dir = os.path.dirname(script_base)
-DIR = os.path.join(os.path.join(proj_dir, "dataset"), "mari")
-TMP_DIR = os.path.join(DIR, "tmp")
+TARGET = load_isolate_duplicated_images_data(JSON_PATH)
+if not pathlib.Path(TARGET).is_absolute():
+   TARGET = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), TARGET)
+TMP_DIR = os.path.join(TARGET, "tmp")
 print(f"TMP DIR: {TMP_DIR}")
 
 THRESHOULD = 0.95
@@ -19,7 +20,7 @@ if not os.path.exists(TMP_DIR):
     os.mkdir(TMP_DIR)
     
 files_a = sorted(
-    [f for f in os.listdir(DIR) if f.lower().endswith(("png", "jpg", "jpeg"))]
+    [f for f in os.listdir(TARGET) if f.lower().endswith(("png", "jpg", "jpeg"))]
 )
 
 files_b = copy.deepcopy(files_a)
@@ -32,8 +33,8 @@ for a in files_a:
             print("Same file. Skip it.")
             continue
 
-        path_a = os.path.join(DIR, a)
-        path_b = os.path.join(DIR, b)
+        path_a = os.path.join(TARGET, a)
+        path_b = os.path.join(TARGET, b)
 
         if not os.path.exists(path_a) or not os.path.exists(path_b):
             print("file is already moved. Skip it.")
