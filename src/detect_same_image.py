@@ -1,11 +1,12 @@
 import os
-import pathlib
 import torch
 import torch.nn as nn
 from torchvision import models, transforms
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+
+from pathsolver import get_base_dir, get_absolute_path_if_not
 from settings import load_detect_same_image_data, JSON_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -103,12 +104,9 @@ def display(result, save_dir=None):
 
 if __name__ == "__main__":
     DIR_A, DIR_B, RESULT_DIR = load_detect_same_image_data(JSON_PATH)
-    if not pathlib.Path(DIR_A).is_absolute():
-        DIR_A = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), DIR_A)
-    if not pathlib.Path(DIR_B).is_absolute():
-        DIR_B = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), DIR_B)
-    if not pathlib.Path(RESULT_DIR).is_absolute():
-        RESULT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), RESULT_DIR)
+    DIR_A = get_absolute_path_if_not(get_base_dir(__file__), DIR_A)
+    DIR_B = get_absolute_path_if_not(get_base_dir(__file__), DIR_B)
+    RESULT_DIR = get_absolute_path_if_not(get_base_dir(__file__), RESULT_DIR)
     
     results = compare_all(DIR_A, DIR_B)
     for result in results:
