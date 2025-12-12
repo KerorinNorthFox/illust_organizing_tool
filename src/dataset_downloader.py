@@ -3,8 +3,8 @@ import pathlib
 from urllib.parse import urljoin
 import requests
 
-from path_solver import get_base_dir, get_absolute_path_if_not
-from settings import load_dataset_downloader_data, JSON_PATH
+from utils.path_solver import get_base_dir, get_absolute_path_if_not
+from utils.settings import load_dataset_downloader_data, JSON_PATH
 
 BASE_URL = "https://danbooru.donmai.us"
 POST_JSON_URL = urljoin(BASE_URL, "posts.json")

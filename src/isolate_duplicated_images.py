@@ -5,8 +5,8 @@ import copy
 import shutil
 from detect_same_image import compare
 
-from path_solver import get_base_dir, get_absolute_path_if_not
-from settings import load_isolate_duplicated_images_data, JSON_PATH
+from utils.path_solver import get_base_dir, get_absolute_path_if_not
+from utils.settings import load_isolate_duplicated_images_data, JSON_PATH
 
 TARGET = load_isolate_duplicated_images_data(JSON_PATH)
 TARGET = get_absolute_path_if_not(get_base_dir(__file__), TARGET)

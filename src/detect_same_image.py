@@ -6,8 +6,8 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-from path_solver import get_base_dir, get_absolute_path_if_not
-from settings import load_detect_same_image_data, JSON_PATH
+from utils.path_solver import get_base_dir, get_absolute_path_if_not
+from utils.settings import load_detect_same_image_data, JSON_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("using device:", device)

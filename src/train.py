@@ -7,9 +7,9 @@ from torchvision import datasets, transforms, models
 from torchinfo import summary
 from tqdm import tqdm
 
-from path_solver import get_base_dir, get_absolute_path_if_not
-from logger import export_train_plot, export_train_logs
-from settings import load_train_data, JSON_PATH
+from utils.path_solver import get_base_dir, get_absolute_path_if_not
+from utils.logger import export_train_plot, export_train_logs
+from utils.settings import load_train_data, JSON_PATH
 
 DATASET_DIR, SAVE_DIR, MODEL_NAME, EPOCHS = load_train_data(JSON_PATH)
 DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), DATASET_DIR)

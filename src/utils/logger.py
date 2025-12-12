@@ -55,11 +55,11 @@ def export_train_logs(save_dir, dataset, val_ratio, total_size, train_size, val_
         
         f.write("train time list: [\n")
         for train_time in train_time_list:
-            f.write(f"  {train_time} sec\n")
+            f.write(f"  {train_time} min\n")
         f.write("]\n")
         f.write("val time list: [\n")
         for val_time in val_time_list:
-            f.write(f"  {val_time} sec\n")
+            f.write(f"  {val_time} min\n")
         f.write("]\n")
         
         f.write("\nmodel: ")

@@ -7,8 +7,8 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 from train import val_transform
-from path_solver import get_base_dir, get_absolute_path_if_not
-from settings import load_predict_data, JSON_PATH
+from utils.path_solver import get_base_dir, get_absolute_path_if_not
+from utils.settings import load_predict_data, JSON_PATH
 
 def predict(image_path, model, device):
     img = Image.open(image_path).convert("RGB")
