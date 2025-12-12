@@ -1,5 +1,6 @@
 /detect_same_image_test
 /dl_images
 /datasets
+/src/runs
 *.pth
 settings.json

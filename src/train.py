@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import datasets, transforms, models
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 from path_solver import get_base_dir, get_absolute_path_if_not
 from settings import load_train_data, JSON_PATH
@@ -98,13 +99,22 @@ def val_epoch(model, dataloader, criterion, device):
     avg_val_acc = val_acc / len(dataloader.dataset)
     return avg_val_loss, avg_val_acc
 
+def display(x, train_y, val_y, label, title, save_path):
+    plt.figure(figsize=(10,4))
+    
+    plt.plot(x, train_y, label="train", color="blue")
+    plt.plot(x, val_y, label="val", color="red")
+    plt.xlabel("epoch")
+    plt.ylabel(label)
+    plt.title(title)
+    
+    plt.legend()
+    plt.savefig(save_path)
 
 if __name__ == "__main__":
     ### モデル定義 ###
-    weights = models.ResNet50_Weights.DEFAULT
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    model = models.resnet50(weights=weights)
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
     model = model.to(device)
 
@@ -129,7 +139,12 @@ if __name__ == "__main__":
         print(f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
 
     now = datetime.datetime.now()
-    model_path = MODEL_PATH_SAVE.replace("{datetime}", now.strftime("%Y-%m-%d-%H-%M-%S"))
+    now_str = now.strftime("%Y-%m-%d-%H-%M-%S")
+    model_path = MODEL_PATH_SAVE.replace("{datetime}", now_str)
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
     torch.save(model.state_dict(), model_path)
     print("Saved model.")
+
+    epoch_list = list(range(epochs))
+    display(epoch_list, train_loss_list, val_loss_list, "loss", "train / val loss", "runs/{datetime}/loss.png".replace("{datetime}", now_str))
+    display(epoch_list, train_acc_list, val_acc_list, "acc", "train / val acc", "runs/{datetime}/acc.png".replace("{datetime}", now_str))
