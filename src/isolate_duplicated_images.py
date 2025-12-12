@@ -44,5 +44,5 @@ for a in files_a:
         print(f">>Score is {score}")
 
         if score >= THRESHOULD:
-           print("Moved.")
-           shutil.move(path_b, TMP_DIR) 
+            print("Moved.")
+            shutil.move(path_b, TMP_DIR) 
