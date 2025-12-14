@@ -13,7 +13,7 @@ def export_train_plot(x, train_y, val_y, label, title, save_path):
     plt.legend()
     plt.savefig(save_path)
 
-def export_train_logs(save_dir, dataset, val_ratio, total_size, train_size, val_size, model_info, batch_size, classes, epochs, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list):
+def export_train_logs(save_dir, dataset, val_ratio, total_size, train_size, val_size, model_info, batch_size, classes, epochs, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch):
     with open(os.path.join(save_dir, "log.txt"), "w", encoding="utf-8") as f:
         f.write("dataset: ")
         f.write(f"{dataset}\n")
@@ -35,6 +35,7 @@ def export_train_logs(save_dir, dataset, val_ratio, total_size, train_size, val_
         f.write("]\n")
         
         f.write(f"epochs: {epochs}\n")
+        f.write(f"Best epoch: {best_epoch}\n")
         
         f.write("train loss list: [\n")
         for train_loss in train_loss_list:

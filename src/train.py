@@ -1,6 +1,7 @@
 import os
 import time
 import datetime
+import copy
 import torch
 from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import datasets, transforms
@@ -128,6 +129,12 @@ if __name__ == "__main__":
     train_time_list = []
     val_time_list = []
     epochs = EPOCHS
+    # Early stopping関係
+    min_val_loss = 1.0
+    no_update_val_loss_count = 0
+    patience = 5
+    best_model_state = None
+    best_epoch = None
     for epoch in range(epochs):
         print(f"Epochs: {epoch+1}")
         
@@ -147,17 +154,30 @@ if __name__ == "__main__":
         val_time_list.append((end_val-start_val)/60)
 
         print(f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
+        
+        # Early stopping処理
+        if val_loss > min_val_loss and not best_model_state:
+            no_update_val_loss_count += 1
+            if no_update_val_loss_count >= patience:
+                best_epoch = epoch
+                best_model_state = copy.deepcopy(model.state_dict())
+                print("patience reached. Copied current model as best model. And training continue.")
+            continue
+        min_val_loss = val_loss
 
     # モデルの保存
-    now = datetime.datetime.now()
-    now_str = now.strftime("%Y-%m-%d-%H-%M-%S")
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     save_dir = SAVE_DIR.replace("{datetime}", now_str)
     os.makedirs(save_dir, exist_ok=True)
     torch.save(model.state_dict(), os.path.join(save_dir, MODEL_NAME))
     print(f"Saved model {MODEL_NAME}.")
+    # Early stoppingによって得られたベストモデルを保存
+    if best_model_state:
+        model_path = os.path.join(save_dir, f"best_{MODEL_NAME}")
+        torch.save(best_model_state, model_path)
 
     # データのエクスポート
     epoch_list = list(range(epochs))
     export_train_plot(epoch_list, train_loss_list, val_loss_list, "loss", "train / val loss", os.path.join(save_dir, "loss.png"))
     export_train_plot(epoch_list, train_acc_list, val_acc_list, "acc", "train / val acc", os.path.join(save_dir, "acc.png"))
-    export_train_logs(save_dir, DATASET_DIR, VAL_RATIO, total_size, train_size, val_size, model_info, BATCH_SIZE, base_dataset.classes, epochs, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list)
+    export_train_logs(save_dir, DATASET_DIR, VAL_RATIO, total_size, train_size, val_size, model_info, BATCH_SIZE, base_dataset.classes, epochs, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch)
