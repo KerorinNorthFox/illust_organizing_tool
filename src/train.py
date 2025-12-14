@@ -3,10 +3,11 @@ import time
 import datetime
 import torch
 from torch.utils.data import DataLoader, Subset, random_split
-from torchvision import datasets, transforms, models
+from torchvision import datasets, transforms
 from torchinfo import summary
 from tqdm import tqdm
 
+from model_container import ModelContainer
 from utils.path_solver import get_base_dir, get_absolute_path_if_not
 from utils.logger import export_train_plot, export_train_logs
 from utils.settings import load_train_data, JSON_PATH
@@ -59,6 +60,9 @@ val_dataset = Subset(val_dataset_full, val_indices.indices)
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
+
+
+
 ### 学習, 評価関数 ###
 def train_epoch(model, dataloader, criterion, optimizer, device):
     model.train() # モデルを学習モードに設定
@@ -108,15 +112,11 @@ def val_epoch(model, dataloader, criterion, device):
 
 if __name__ == "__main__":
     print("Dataset dir:", DATASET_DIR)
-    print("クラス数:", base_dataset.classes)
+    print("クラス数:", num_classes)
+    print("クラス:", base_dataset.classes)
     
     ### モデル定義 ###
-    weights = models.ResNet50_Weights.DEFAULT
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    model = models.resnet50(weights=weights)
-    model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-    model = model.to(device)
+    model, device = ModelContainer.select("resnet18", num_classes=num_classes)
     model_info = summary(model, input_size=(BATCH_SIZE, 3, 224, 224))
     print(model_info)
 

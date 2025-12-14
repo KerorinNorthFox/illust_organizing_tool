@@ -1,9 +1,10 @@
 import torch
 from torch.utils.data import DataLoader
-from torchvision import datasets, models
-from train import val_transform
+from torchvision import datasets
 from tqdm import tqdm
 
+from train import val_transform
+from model_container import ModelContainer
 from utils.path_solver import get_base_dir, get_absolute_path_if_not
 from utils.settings import load_test_data, JSON_PATH
 
@@ -30,11 +31,8 @@ def predict(model, dataloader, device):
 
 if __name__ == "__main__":
     num_classes = len(test_dataset.classes)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = models.resnet50(weights=None)
-    model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
-    model = model.to(device)
-
+    
+    model, device = ModelContainer.select("resnet18", is_weights=False, num_classes=num_classes, model_path=MODEL_PATH)
+    
     test_acc = predict(model, test_loader, device)
     print("テストデータに対する精度:", test_acc*100, "%")

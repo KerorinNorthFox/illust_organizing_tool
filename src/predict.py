@@ -1,12 +1,12 @@
 import os
 import torch
 import torch.nn.functional as F
-from torchvision import models
 from tqdm import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
 
 from train import val_transform
+from model_container import ModelContainer
 from utils.path_solver import get_base_dir, get_absolute_path_if_not
 from utils.settings import load_predict_data, JSON_PATH
 
@@ -23,16 +23,6 @@ def predict(image_path, model, device):
     class_id = pred.item()
         
     return class_id, max_prob
-    
-def load_model(model_path, class_num):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = models.resnet50(weights=None)
-    model.fc = torch.nn.Linear(model.fc.in_features, class_num)
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    model = model.to(device)
-    model.eval()
-
-    return model, device
 
 def display(image_path, class_name, class_id, prob):
     img = Image.open(image_path)
@@ -50,7 +40,8 @@ if __name__ == "__main__":
     class_names = sorted(
         [name for name in os.listdir(DATASET_DIR) if os.path.isdir(os.path.join(DATASET_DIR, name))]
     )
-    model, device = load_model(MODEL_PATH, len(class_names))
+    model, device = ModelContainer.select("resnet18", is_weights=False, num_classes=len(class_names), model_path=MODEL_PATH)
+    model.eval()
 
     # TARGETディレクトリ内の全ての画像絶対パスを取得
     image_pathes = sorted(
