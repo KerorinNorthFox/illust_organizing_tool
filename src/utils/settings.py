@@ -10,7 +10,14 @@ def load_json(json_path):
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 JSON_PATH = os.path.join(BASE_DIR, "settings.json")
-        
+
+def load_project_dir_name(json_path):
+    data = load_json(json_path)
+    
+    project_dir_name = data["project_dir_name"]
+    
+    return project_dir_name
+
 def load_dataset_downloader_data(json_path):
     data = load_json(json_path)
     dataset_downloader_data = data["dataset_downloader"]
@@ -48,8 +55,9 @@ def load_train_data(json_path):
     save_dir = train_data["save_dir"]
     model_name = train_data["model_name"]
     epochs = train_data["epochs"]
+    model_type = data["model_type"]
 
-    return dataset_dir, save_dir, model_name, epochs
+    return dataset_dir, save_dir, model_name, epochs, model_type
 
 def load_test_data(json_path):
     data = load_json(json_path)
@@ -57,8 +65,9 @@ def load_test_data(json_path):
     
     dataset_dir = test_data["dataset_dir"]
     model_path = data["model_path"]
+    model_type = data["model_type"]
 
-    return dataset_dir, model_path
+    return dataset_dir, model_path, model_type
 
 def load_predict_data(json_path):
     data = load_json(json_path)
@@ -67,6 +76,7 @@ def load_predict_data(json_path):
     target = predict_data["target"]
     model_path = data["model_path"]
     dataset_dir = data["train"]["dataset_dir"]
+    model_type = data["model_type"]
 
-    return target, model_path, dataset_dir
+    return target, dataset_dir, model_path, model_type
 

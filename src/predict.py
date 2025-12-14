@@ -33,14 +33,14 @@ def display(image_path, class_name, class_id, prob):
     plt.show()
 
 if __name__ == "__main__":
-    TARGET, MODEL_PATH, DATASET_DIR= load_predict_data(JSON_PATH)
+    TARGET, DATASET_DIR, MODEL_PATH, model_type = load_predict_data(JSON_PATH)
     TARGET = get_absolute_path_if_not(get_base_dir(__file__), TARGET)
     DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), DATASET_DIR)
     # DATASET_DIRからクラス名を取得
     class_names = sorted(
         [name for name in os.listdir(DATASET_DIR) if os.path.isdir(os.path.join(DATASET_DIR, name))]
     )
-    model, device = ModelContainer.select("resnet18", is_weights=False, num_classes=len(class_names), model_path=MODEL_PATH)
+    model, device = ModelContainer.select(model_type, is_weights=False, num_classes=len(class_names), model_path=MODEL_PATH)
     model.eval()
 
     # TARGETディレクトリ内の全ての画像絶対パスを取得

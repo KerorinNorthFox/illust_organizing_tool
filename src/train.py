@@ -12,7 +12,7 @@ from utils.path_solver import get_base_dir, get_absolute_path_if_not
 from utils.logger import export_train_plot, export_train_logs
 from utils.settings import load_train_data, JSON_PATH
 
-DATASET_DIR, SAVE_DIR, MODEL_NAME, EPOCHS = load_train_data(JSON_PATH)
+DATASET_DIR, SAVE_DIR, MODEL_NAME, EPOCHS, model_type = load_train_data(JSON_PATH)
 DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), DATASET_DIR)
 VAL_RATIO = 0.2
 BATCH_SIZE = 32
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     print("クラス:", base_dataset.classes)
     
     ### モデル定義 ###
-    model, device = ModelContainer.select("resnet18", num_classes=num_classes)
+    model, device = ModelContainer.select(model_type, num_classes=num_classes)
     model_info = summary(model, input_size=(BATCH_SIZE, 3, 224, 224))
     print(model_info)
 

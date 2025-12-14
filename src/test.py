@@ -8,7 +8,7 @@ from model_container import ModelContainer
 from utils.path_solver import get_base_dir, get_absolute_path_if_not
 from utils.settings import load_test_data, JSON_PATH
 
-DATASET_DIR, MODEL_PATH = load_test_data(JSON_PATH)
+DATASET_DIR, MODEL_PATH, model_type = load_test_data(JSON_PATH)
 DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), DATASET_DIR)
 print("Dataset dir:", DATASET_DIR)
 
@@ -32,7 +32,7 @@ def predict(model, dataloader, device):
 if __name__ == "__main__":
     num_classes = len(test_dataset.classes)
     
-    model, device = ModelContainer.select("resnet18", is_weights=False, num_classes=num_classes, model_path=MODEL_PATH)
+    model, device = ModelContainer.select(model_type, is_weights=False, num_classes=num_classes, model_path=MODEL_PATH)
     
     test_acc = predict(model, test_loader, device)
     print("テストデータに対する精度:", test_acc*100, "%")
