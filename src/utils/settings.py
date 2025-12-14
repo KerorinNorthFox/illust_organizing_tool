@@ -54,10 +54,11 @@ def load_train_data(json_path):
     dataset_dir = train_data["dataset_dir"]
     save_dir = train_data["save_dir"]
     model_name = train_data["model_name"]
+    batch_size = train_data["batch_size"]
     epochs = train_data["epochs"]
     model_type = data["model_type"]
 
-    return dataset_dir, save_dir, model_name, epochs, model_type
+    return dataset_dir, save_dir, model_name, batch_size, epochs, model_type
 
 def load_test_data(json_path):
     data = load_json(json_path)

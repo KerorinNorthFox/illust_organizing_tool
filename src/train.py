@@ -12,10 +12,9 @@ from utils.path_solver import get_base_dir, get_absolute_path_if_not
 from utils.logger import export_train_plot, export_train_logs
 from utils.settings import load_train_data, JSON_PATH
 
-dataset_dir, SAVE_DIR, MODEL_NAME, EPOCHS, MODEL_TYPE = load_train_data(JSON_PATH)
+dataset_dir, SAVE_DIR, MODEL_NAME, BATCH_SIZE, EPOCHS, MODEL_TYPE = load_train_data(JSON_PATH)
 DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), dataset_dir)
 VAL_RATIO = 0.2
-BATCH_SIZE = 32
 
 ### 画像の前処理 ###
 train_transform = transforms.Compose([
