@@ -155,6 +155,6 @@ if __name__ == "__main__":
 
     # データのエクスポート
     epoch_list = list(range(epochs))
-    export_train_plot(epoch_list, train_loss_list, val_loss_list, "loss", "train / val loss", os.path.join(SAVE_DIR, "loss.png"))
-    export_train_plot(epoch_list, train_acc_list, val_acc_list, "acc", "train / val acc", os.path.join(SAVE_DIR, "acc.png"))
-    export_train_logs(SAVE_DIR, DATASET_DIR, VAL_RATIO, total_size, train_size, val_size, model_info, BATCH_SIZE, base_dataset.classes, epochs, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list)
+    export_train_plot(epoch_list, train_loss_list, val_loss_list, "loss", "train / val loss", os.path.join(save_dir, "loss.png"))
+    export_train_plot(epoch_list, train_acc_list, val_acc_list, "acc", "train / val acc", os.path.join(save_dir, "acc.png"))
+    export_train_logs(save_dir, DATASET_DIR, VAL_RATIO, total_size, train_size, val_size, model_info, BATCH_SIZE, base_dataset.classes, epochs, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list)
