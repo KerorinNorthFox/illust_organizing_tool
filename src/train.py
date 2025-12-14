@@ -12,8 +12,8 @@ from utils.path_solver import get_base_dir, get_absolute_path_if_not
 from utils.logger import export_train_plot, export_train_logs
 from utils.settings import load_train_data, JSON_PATH
 
-DATASET_DIR, SAVE_DIR, MODEL_NAME, EPOCHS, model_type = load_train_data(JSON_PATH)
-DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), DATASET_DIR)
+dataset_dir, SAVE_DIR, MODEL_NAME, EPOCHS, MODEL_TYPE = load_train_data(JSON_PATH)
+DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), dataset_dir)
 VAL_RATIO = 0.2
 BATCH_SIZE = 32
 
@@ -60,9 +60,6 @@ val_dataset = Subset(val_dataset_full, val_indices.indices)
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
-
-
-
 ### 学習, 評価関数 ###
 def train_epoch(model, dataloader, criterion, optimizer, device):
     model.train() # モデルを学習モードに設定
@@ -82,9 +79,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         acc = (outputs.max(1)[1] == labels).sum() # 精度計算
         train_acc += acc.item()
         scaler.scale(loss).backward()
-        # loss.backward()
         scaler.step(optimizer)
-        # optimizer.step()
         scaler.update()
         
     avg_train_loss = train_loss / len(dataloader.dataset) # 損失平均
@@ -111,14 +106,14 @@ def val_epoch(model, dataloader, criterion, device):
     return avg_val_loss, avg_val_acc
 
 if __name__ == "__main__":
-    print("Dataset dir:", DATASET_DIR)
+    print("Dataset dir:", dataset_dir)
+    print("モデル名:", MODEL_TYPE)
     print("クラス数:", num_classes)
     print("クラス:", base_dataset.classes)
     
     ### モデル定義 ###
-    model, device = ModelContainer.select(model_type, num_classes=num_classes)
+    model, device = ModelContainer.select(MODEL_TYPE, num_classes=num_classes)
     model_info = summary(model, input_size=(BATCH_SIZE, 3, 224, 224))
-    print(model_info)
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -154,10 +149,10 @@ if __name__ == "__main__":
     # モデルの保存
     now = datetime.datetime.now()
     now_str = now.strftime("%Y-%m-%d-%H-%M-%S")
-    SAVE_DIR = SAVE_DIR.replace("{datetime}", now_str)
-    os.makedirs(SAVE_DIR, exist_ok=True)
-    torch.save(model.state_dict(), os.path.join(SAVE_DIR, MODEL_NAME))
-    print("Saved model.")
+    save_dir = SAVE_DIR.replace("{datetime}", now_str)
+    os.makedirs(save_dir, exist_ok=True)
+    torch.save(model.state_dict(), os.path.join(save_dir, MODEL_NAME))
+    print(f"Saved model {MODEL_NAME}.")
 
     # データのエクスポート
     epoch_list = list(range(epochs))

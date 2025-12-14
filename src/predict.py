@@ -33,19 +33,19 @@ def display(image_path, class_name, class_id, prob):
     plt.show()
 
 if __name__ == "__main__":
-    TARGET, DATASET_DIR, MODEL_PATH, model_type = load_predict_data(JSON_PATH)
-    TARGET = get_absolute_path_if_not(get_base_dir(__file__), TARGET)
-    DATASET_DIR = get_absolute_path_if_not(get_base_dir(__file__), DATASET_DIR)
+    target, dataset_dir, model_path, model_type = load_predict_data(JSON_PATH)
+    target = get_absolute_path_if_not(get_base_dir(__file__), target)
+    dataset_dir = get_absolute_path_if_not(get_base_dir(__file__), dataset_dir)
     # DATASET_DIRからクラス名を取得
     class_names = sorted(
-        [name for name in os.listdir(DATASET_DIR) if os.path.isdir(os.path.join(DATASET_DIR, name))]
+        [name for name in os.listdir(dataset_dir) if os.path.isdir(os.path.join(dataset_dir, name))]
     )
-    model, device = ModelContainer.select(model_type, is_weights=False, num_classes=len(class_names), model_path=MODEL_PATH)
+    model, device = ModelContainer.select(model_type, is_weights=False, num_classes=len(class_names), model_path=model_path)
     model.eval()
 
     # TARGETディレクトリ内の全ての画像絶対パスを取得
     image_pathes = sorted(
-        [os.path.join(TARGET, f) for f in os.listdir(TARGET) if f.lower().endswith(("png", "jpg", "jpeg"))]
+        [os.path.join(target, f) for f in os.listdir(target) if f.lower().endswith(("png", "jpg", "jpeg"))]
     )
     for image_path in tqdm(image_pathes):
         id, prob = predict(image_path, model, device)
