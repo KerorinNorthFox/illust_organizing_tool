@@ -166,7 +166,7 @@ def train(model, criterion, optimizer, device, train_loader, epochs):
                 best_model_state = copy.deepcopy(model.state_dict())
                 print("patience reached. Copied current model as best model. And training continue.")
 
-    return train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch, best_model_state
+    return (train_loss_list, train_acc_list, train_time_list), (val_loss_list, val_acc_list, val_time_list), (best_epoch, best_model_state)
 
 if __name__ == "__main__":
     print("Dataset dir:", dataset_dir)
@@ -182,7 +182,10 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     # 学習
-    train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch, best_model_state = train(model, criterion, optimizer, device, train_loader, EPOCHS)
+    train_data, val_data, best_data = train(model, criterion, optimizer, device, train_loader, EPOCHS)
+    train_loss_list, train_acc_list, train_time_list = train_data
+    val_loss_list, val_acc_list, val_time_list = val_data
+    best_epoch, best_model_state = best_data
 
     # モデルの保存
     now_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
