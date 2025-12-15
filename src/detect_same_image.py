@@ -103,11 +103,11 @@ def display(result, save_dir=None):
     plt.show()
 
 if __name__ == "__main__":
-    DIR_A, DIR_B, RESULT_DIR = load_detect_same_image_data(JSON_PATH)
-    DIR_A = get_absolute_path_if_not(get_base_dir(__file__), DIR_A)
-    DIR_B = get_absolute_path_if_not(get_base_dir(__file__), DIR_B)
-    RESULT_DIR = get_absolute_path_if_not(get_base_dir(__file__), RESULT_DIR)
+    dir_a, dir_b, result_dir = load_detect_same_image_data(JSON_PATH)
+    dir_a = get_absolute_path_if_not(get_base_dir(__file__), dir_a)
+    dir_b = get_absolute_path_if_not(get_base_dir(__file__), dir_b)
+    result_dir = get_absolute_path_if_not(get_base_dir(__file__), result_dir)
     
-    results = compare_all(DIR_A, DIR_B)
+    results = compare_all(dir_a, dir_b)
     for result in results:
-        display(result, RESULT_DIR) 
+        display(result, result_dir)

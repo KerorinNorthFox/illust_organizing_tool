@@ -1,5 +1,4 @@
 import os
-import pathlib
 from urllib.parse import urljoin
 import requests
 
@@ -65,8 +64,8 @@ def download(json_url, tags:list[str], start:int, end:int, save_dir:str):
                 print("Saved:", filename)
 
 if __name__ == "__main__":
-    TAGS, START_PAGE_INDEX, END_PAGE_INDEX, SAVE_DIR = load_dataset_downloader_data(JSON_PATH)
-    SAVE_DIR = get_absolute_path_if_not(get_base_dir(__file__), SAVE_DIR)
+    tags, start, end, save_dir = load_dataset_downloader_data(JSON_PATH)
+    save_dir = get_absolute_path_if_not(get_base_dir(__file__), save_dir)
         
     print("Start download")
-    download(POST_JSON_URL, TAGS, START_PAGE_INDEX, END_PAGE_INDEX, SAVE_DIR)
+    download(POST_JSON_URL, tags, start, end, save_dir)
