@@ -108,33 +108,38 @@ def val_epoch(model, dataloader, criterion, device):
     avg_val_acc = val_acc / len(dataloader.dataset)
     return avg_val_loss, avg_val_acc
 
-if __name__ == "__main__":
-    print("Dataset dir:", dataset_dir)
-    print("モデル名:", MODEL_TYPE)
-    print("クラス数:", num_classes)
-    print("クラス:", base_dataset.classes)
-    
-    ### モデル定義 ###
-    model, device = ModelContainer.select(MODEL_TYPE, num_classes=num_classes)
-    model_info = summary(model, input_size=(BATCH_SIZE, 3, 224, 224))
+class EarlyStopping():
+    def __init__(self, patience):
+        self.__patience = patience
+        self.__keep_count = 0
+        self.__min_val_loss = 1.0
 
-    criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    def forward_count(self):
+        self.__keep_count += 1
 
-    # 学習
-    train_loss_list = []
-    train_acc_list = []
-    val_loss_list = []
-    val_acc_list = []
-    train_time_list = []
-    val_time_list = []
-    epochs = EPOCHS
-    # Early stopping関係
-    min_val_loss = 1.0
-    no_update_val_loss_count = 0
-    patience = 5
-    best_model_state = None
+    def reset_count(self):
+        self.__keep_count = 0
+
+    def judge(self, current_val_loss):
+        if current_val_loss > self.__min_val_loss:
+            self.forward_count()
+            if self.__keep_count >= self.__patience:
+                return True
+            return False
+        
+        self.reset_count()
+        self.__min_val_loss = current_val_loss
+        return False
+
+def train(model, criterion, optimizer, device, train_loader, epochs):
+    train_loss_list, train_acc_list  = [], [] # 全エポックでの学習損失, 精度合計
+    val_loss_list, val_acc_list = [], [] # 全エポックでの評価損失, 精度合計
+    train_time_list, val_time_list = [], [] # 全エポックでの実行時間合計
+
     best_epoch = None
+    best_model_state = None
+    stopper = EarlyStopping(patience=5)
+
     for epoch in range(epochs):
         print(f"Epochs: {epoch+1}")
         
@@ -154,16 +159,33 @@ if __name__ == "__main__":
         val_time_list.append((end_val-start_val)/60)
 
         print(f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
-        
-        # Early stopping処理
-        if val_loss > min_val_loss and not best_model_state:
-            no_update_val_loss_count += 1
-            if no_update_val_loss_count >= patience:
-                best_epoch = epoch
+
+        if best_model_state:
+            if stopper.judge(val_loss):
+                best_epoch = epoch + 1
                 best_model_state = copy.deepcopy(model.state_dict())
                 print("patience reached. Copied current model as best model. And training continue.")
-            continue
-        min_val_loss = val_loss
+
+    return (train_loss_list, train_acc_list, train_time_list), (val_loss_list, val_acc_list, val_time_list), (best_epoch, best_model_state)
+
+if __name__ == "__main__":
+    print("Dataset dir:", dataset_dir)
+    print("モデル名:", MODEL_TYPE)
+    print("クラス数:", num_classes)
+    print("クラス:", base_dataset.classes)
+    
+    ### モデル定義 ###
+    model, device = ModelContainer.select(MODEL_TYPE, num_classes=num_classes)
+    model_info = summary(model, input_size=(BATCH_SIZE, 3, 224, 224))
+
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+
+    # 学習
+    train_data, val_data, best_data = train(model, criterion, optimizer, device, train_loader, EPOCHS)
+    train_loss_list, train_acc_list, train_time_list = train_data
+    val_loss_list, val_acc_list, val_time_list = val_data
+    best_epoch, best_model_state = best_data
 
     # モデルの保存
     now_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -177,7 +199,7 @@ if __name__ == "__main__":
         torch.save(best_model_state, model_path)
 
     # データのエクスポート
-    epoch_list = list(range(epochs))
+    epoch_list = list(range(EPOCHS))
     export_train_plot(epoch_list, train_loss_list, val_loss_list, "loss", "train / val loss", os.path.join(save_dir, "loss.png"))
     export_train_plot(epoch_list, train_acc_list, val_acc_list, "acc", "train / val acc", os.path.join(save_dir, "acc.png"))
-    export_train_logs(save_dir, DATASET_DIR, VAL_RATIO, total_size, train_size, val_size, model_info, BATCH_SIZE, base_dataset.classes, epochs, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch)
+    export_train_logs(save_dir, DATASET_DIR, VAL_RATIO, total_size, train_size, val_size, model_info, BATCH_SIZE, base_dataset.classes, EPOCHS, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch)
