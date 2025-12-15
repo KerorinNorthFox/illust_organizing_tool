@@ -125,6 +125,7 @@ class EarlyStopping():
             self.forward_count()
             if self.__keep_count >= self.__patience:
                 return True
+            return False
         
         self.reset_count()
         self.__min_val_loss = current_val_loss
@@ -183,50 +184,6 @@ if __name__ == "__main__":
     # 学習
     train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch, best_model_state = train(model, criterion, optimizer, device, train_loader, EPOCHS)
 
-    # # 学習
-    # train_loss_list = []
-    # train_acc_list = []
-    # val_loss_list = []
-    # val_acc_list = []
-    # train_time_list = []
-    # val_time_list = []
-    # epochs = EPOCHS
-    # # Early stopping関係
-    # min_val_loss = 1.0
-    # no_update_val_loss_count = 0
-    # patience = 5
-    # best_model_state = None
-    # best_epoch = None
-    # for epoch in range(epochs):
-    #     print(f"Epochs: {epoch+1}")
-    #
-    #     start_train = time.perf_counter()
-    #     train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
-    #     end_train = time.perf_counter()
-    #
-    #     start_val = time.perf_counter()
-    #     val_loss, val_acc = val_epoch(model, val_loader, criterion, device)
-    #     end_val = time.perf_counter()
-    #
-    #     train_loss_list.append(train_loss)
-    #     train_acc_list.append(train_acc)
-    #     val_loss_list.append(val_loss)
-    #     val_acc_list.append(val_acc)
-    #     train_time_list.append((end_train-start_train)/60)
-    #     val_time_list.append((end_val-start_val)/60)
-    #
-    #     print(f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
-    #
-    #     # Early stopping処理
-    #     if val_loss > min_val_loss and not best_model_state:
-    #         no_update_val_loss_count += 1
-    #         if no_update_val_loss_count >= patience:
-    #             best_epoch = epoch
-    #             best_model_state = copy.deepcopy(model.state_dict())
-    #             print("patience reached. Copied current model as best model. And training continue.")
-    #         continue
-    #     min_val_loss = val_loss
-    #
     # モデルの保存
     now_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     save_dir = SAVE_DIR.replace("{datetime}", now_str)
@@ -239,8 +196,7 @@ if __name__ == "__main__":
         torch.save(best_model_state, model_path)
 
     # データのエクスポート
-    # epoch_list = list(range(epochs))
     epoch_list = list(range(EPOCHS))
     export_train_plot(epoch_list, train_loss_list, val_loss_list, "loss", "train / val loss", os.path.join(save_dir, "loss.png"))
     export_train_plot(epoch_list, train_acc_list, val_acc_list, "acc", "train / val acc", os.path.join(save_dir, "acc.png"))
-    export_train_logs(save_dir, DATASET_DIR, VAL_RATIO, total_size, train_size, val_size, model_info, BATCH_SIZE, base_dataset.classes, epochs, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch)
+    export_train_logs(save_dir, DATASET_DIR, VAL_RATIO, total_size, train_size, val_size, model_info, BATCH_SIZE, base_dataset.classes, EPOCHS, train_loss_list, train_acc_list, val_loss_list, val_acc_list, train_time_list, val_time_list, best_epoch)
