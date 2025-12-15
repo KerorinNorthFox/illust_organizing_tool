@@ -30,6 +30,11 @@ def display(image_path, class_name, class_id, prob):
     plt.imshow(img)
     plt.title(f"Predicted : {class_name}, id : {class_id}, prob: {prob}", fontsize=16)
     plt.axis("off")
+
+    def close(event):
+        if event.key == "n":
+            plt.close()
+    plt.connect("key_press_event", close)
     plt.show()
 
 if __name__ == "__main__":
